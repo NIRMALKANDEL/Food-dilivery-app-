@@ -1,5 +1,5 @@
 import React from "react";
-import Styles from "./Shimmer.module.css";
+import * as Styles from "./Shimmer.module.css";
 
 const Shimmer = () => {
   return (
