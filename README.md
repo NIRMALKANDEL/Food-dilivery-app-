@@ -2,6 +2,8 @@
 
 A portfolio-ready food-delivery web app built with **React 18**, **Redux Toolkit**, **React Router**, and **Tailwind CSS**. It covers the full ordering flow — discovering restaurants, browsing menus, managing a cart, checking out with an address map and coupons, and tracking order history — backed by real restaurant data with a resilient offline-friendly fallback.
 
+**🔗 Live demo:** [nibblr-azure.vercel.app](https://nibblr-azure.vercel.app)
+
 ---
 
 ## 🛠️ Getting Started
@@ -76,7 +78,12 @@ and are called out plainly rather than dressed up as real:
 
 The app is a static single-page app after `npm run build` (output in `dist/`). Since it uses client-side routing, the host needs to serve `index.html` for every path.
 
-**Vercel** — a `vercel.json` is already included (build command, output directory, and SPA rewrite). Just import the repo in Vercel and deploy.
+**Vercel** — already deployed at [nibblr-azure.vercel.app](https://nibblr-azure.vercel.app) (project `nibblr` under the `nirmalkandels-projects` team). A `vercel.json` is included with the SPA rewrite. This deployment was pushed manually (`vercel deploy --prebuilt --prod` from a local build) since the Vercel GitHub App isn't installed on this account yet — install it at [github.com/apps/vercel](https://github.com/apps/vercel) and re-import the project to get automatic deploys on every push to `master`; until then, redeploy with:
+
+```bash
+npx vercel build
+npx vercel deploy --prebuilt --prod
+```
 
 **Netlify** — a `netlify.toml` is already included with the build command, publish directory, and SPA redirect. Import the repo in Netlify and deploy.
 
