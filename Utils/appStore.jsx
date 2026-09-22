@@ -1,37 +1,65 @@
 import { configureStore } from "@reduxjs/toolkit";
 import cartReducer from "./cartSlice";
+import favoritesReducer from "./favoritesSlice";
+import ordersReducer from "./ordersSlice";
+import locationReducer from "./locationSlice";
 
-const CART_STORAGE_KEY = "swiggy-clone-cart";
+const STORAGE_KEY = "nibblr-state";
 
-const loadCartFromStorage = () => {
+const DEFAULT_STATE = {
+  cart: { items: [], restaurantId: null },
+  favorites: { restaurants: [], recentlyViewed: [] },
+  orders: { list: [] },
+  location: { label: null, lat: null, lng: null },
+};
+
+const loadStateFromStorage = () => {
   try {
-    const saved = localStorage.getItem(CART_STORAGE_KEY);
-    return saved ? JSON.parse(saved) : undefined;
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return DEFAULT_STATE;
+    const parsed = JSON.parse(saved);
+    // Shallow-merge over the defaults so a state shape from an older
+    // version of the app (missing a newly-added slice) can't crash the
+    // store on load.
+    return {
+      cart: { ...DEFAULT_STATE.cart, ...parsed.cart },
+      favorites: { ...DEFAULT_STATE.favorites, ...parsed.favorites },
+      orders: { ...DEFAULT_STATE.orders, ...parsed.orders },
+      location: { ...DEFAULT_STATE.location, ...parsed.location },
+    };
   } catch (err) {
-    return undefined;
+    return DEFAULT_STATE;
   }
 };
 
 const appStore = configureStore({
   reducer: {
     cart: cartReducer,
+    favorites: favoritesReducer,
+    orders: ordersReducer,
+    location: locationReducer,
   },
-  preloadedState: {
-    cart: loadCartFromStorage() || { items: [], restaurantId: null },
-  },
+  preloadedState: loadStateFromStorage(),
 });
 
-// Cart is the only state worth surviving a refresh/deploy for this app, so
-// persist just that slice rather than the whole store.
+// Cart/favorites/orders/location are the only state worth surviving a
+// refresh/deploy for this app, so persist just those slices rather than the
+// whole store.
 appStore.subscribe(() => {
   try {
+    const state = appStore.getState();
     localStorage.setItem(
-      CART_STORAGE_KEY,
-      JSON.stringify(appStore.getState().cart)
+      STORAGE_KEY,
+      JSON.stringify({
+        cart: state.cart,
+        favorites: state.favorites,
+        orders: state.orders,
+        location: state.location,
+      })
     );
   } catch (err) {
     // localStorage can be unavailable (private mode, disabled storage) —
-    // the cart simply won't persist across reloads in that case.
+    // state simply won't persist across reloads in that case.
   }
 });
 

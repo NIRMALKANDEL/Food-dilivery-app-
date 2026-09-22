@@ -31,8 +31,8 @@ const steps = [
 const About = () => {
   return (
     <div className="max-w-3xl mx-auto p-6 sm:p-10 animate-[fadeIn_0.3s_ease-in-out]">
-      <h1 className="text-3xl font-extrabold text-[#3d4152] mb-4 text-center">
-        About <span className="text-[#fc8019]">Swiggy Clone</span>
+      <h1 className="text-3xl font-extrabold text-ink mb-4 text-center">
+        About <span className="text-brand">Nibblr</span>
       </h1>
       <p className="text-gray-600 leading-relaxed mb-8 text-center">
         We bring your favourite restaurants closer to you. Discover new
@@ -46,7 +46,7 @@ const About = () => {
             key={stat.label}
             className="bg-white shadow-md rounded-xl p-4 text-center"
           >
-            <p className="text-xl font-extrabold text-[#fc8019]">
+            <p className="text-xl font-extrabold text-brand">
               {stat.value}
             </p>
             <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
@@ -54,7 +54,7 @@ const About = () => {
         ))}
       </div>
 
-      <h2 className="text-xl font-bold text-[#3d4152] mb-4 text-center">
+      <h2 className="text-xl font-bold text-ink mb-4 text-center">
         How it works
       </h2>
       <div className="grid sm:grid-cols-2 gap-4 mb-10">
@@ -65,7 +65,7 @@ const About = () => {
           >
             <span className="text-2xl">{step.icon}</span>
             <div>
-              <p className="font-semibold text-[#3d4152]">{step.title}</p>
+              <p className="font-semibold text-ink">{step.title}</p>
               <p className="text-sm text-gray-500 mt-1">{step.text}</p>
             </div>
           </div>
@@ -73,7 +73,7 @@ const About = () => {
       </div>
 
       <div className="bg-white shadow-md rounded-xl p-6 text-center">
-        <h2 className="text-lg font-bold text-[#3d4152] mb-2">
+        <h2 className="text-lg font-bold text-ink mb-2">
           Our Promise
         </h2>
         <p className="text-sm text-gray-500 leading-relaxed">

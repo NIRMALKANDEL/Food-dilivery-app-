@@ -2,8 +2,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import Shimmer from "./Shimmer";
 import useRestrauntMenu from "../Utils/useRestrauntMenu";
 import RestarauntCategory from "./RestarauntCategory";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import TopPicks from "./TopPicks";
+import { addRecentlyViewed } from "../Utils/favoritesSlice";
 
 const ITEM_CATEGORY_TYPE =
   "type.googleapis.com/swiggy.presentation.food.v2.ItemCategory";
@@ -28,8 +30,9 @@ const isVegItem = (item) =>
 function RestrauntMenu() {
   const { resId } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  // All categories are expanded by default (like Swiggy's own menu page) so
+  // All categories are expanded by default (like the real menu page) so
   // dishes and their ADD buttons are visible right away, no extra click
   // needed. Each category can still be individually collapsed.
   const [openCategories, setOpenCategories] = useState(null);
@@ -37,13 +40,30 @@ function RestrauntMenu() {
 
   const { resInfo, usingFallbackData } = useRestrauntMenu(resId);
 
+  const infoCard = resInfo?.cards?.find((c) => c?.card?.card?.info);
+  const { name, cuisines, avgRating, costForTwo, sla, veg, cloudinaryImageId } =
+    infoCard?.card?.card?.info || {};
+
+  useEffect(() => {
+    if (!name) return;
+    dispatch(
+      addRecentlyViewed({
+        id: resId,
+        name,
+        cuisines,
+        cloudinaryImageId,
+        avgRating,
+        costForTwo,
+        sla,
+        veg,
+      })
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resId, name]);
+
   if (resInfo === null) {
     return <Shimmer />;
   }
-
-  const infoCard = resInfo.cards?.find((c) => c?.card?.card?.info);
-  const { name, cuisines, avgRating, costForTwo, sla, veg } =
-    infoCard?.card?.card?.info || {};
 
   const regularCards =
     resInfo.cards?.find((c) => c?.groupedCard)?.groupedCard?.cardGroupMap
@@ -73,7 +93,7 @@ function RestrauntMenu() {
   return (
     <div className="animate-[fadeIn_0.3s_ease-in-out]">
       {usingFallbackData && (
-        <div className="bg-[#fff4e8] text-[#b45309] text-center text-sm py-2 px-4 border-b border-[#fcd9a8]">
+        <div className="bg-accent-light text-accent-dark text-center text-sm py-2 px-4 border-b border-[#fcd9a8]">
           This restaurant's live menu couldn't be reached, so we're showing a
           sample menu instead.
         </div>
@@ -82,13 +102,13 @@ function RestrauntMenu() {
       <div className="max-w-4xl mx-auto p-4 sm:p-6">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1 text-[#3d4152] font-medium mb-4 hover:text-[#fc8019] transition-colors"
+          className="flex items-center gap-1 text-ink font-medium mb-4 hover:text-brand transition-colors"
         >
           ← Back
         </button>
 
         <div className="text-center">
-          <h1 className="font-bold text-3xl text-[#3d4152]">{name}</h1>
+          <h1 className="font-bold text-3xl text-ink">{name}</h1>
           <p className="text-gray-500 mt-2">{cuisines?.join(", ")}</p>
 
           <div className="flex flex-wrap items-center justify-center gap-3 mt-3">
@@ -109,7 +129,7 @@ function RestrauntMenu() {
         <TopPicks resInfo={resInfo} restaurantId={resId} />
 
         <div className="flex justify-end w-full sm:w-9/12 mx-auto mt-6 mb-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-[#3d4152] cursor-pointer select-none">
+          <label className="flex items-center gap-2 text-sm font-medium text-ink cursor-pointer select-none">
             <input
               type="checkbox"
               checked={vegOnly}

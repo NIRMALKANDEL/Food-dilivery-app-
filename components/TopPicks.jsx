@@ -11,7 +11,7 @@ const TopPicks = ({ resInfo, restaurantId }) => {
   if (carousel && carousel.length > 0)
     return (
       <div className="w-full sm:w-9/12 m-auto text-left mb-2">
-        <h1 className="text-xl font-bold text-[#3d4152] mb-3">{title}</h1>
+        <h1 className="text-xl font-bold text-ink mb-3">{title}</h1>
         <div className="flex flex-row overflow-x-auto pb-2">
           {carousel.map((item) => (
             <Carausel

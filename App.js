@@ -1,10 +1,12 @@
 import "./src/index.css";
 import ReactDOM from "react-dom/client";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import Body from "./components/Body";
 import About from "./components/About";
 import Contact from "./components/Contact";
 import Error from "./components/Error";
+import NotFound from "./components/NotFound";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -12,11 +14,17 @@ import {
   useLocation,
 } from "react-router-dom";
 import RestrauntMenu from "./components/RestrauntMenu";
-import { useEffect, useState } from "react";
-import UserContext from "./Utils/UserContext";
+import { useEffect } from "react";
+import { UserProvider } from "./Utils/UserContext";
 import { Provider } from "react-redux";
 import appStore from "./Utils/appStore";
 import Cart from "./components/Cart";
+import Login from "./components/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Checkout from "./components/Checkout";
+import OrderConfirmation from "./components/OrderConfirmation";
+import Orders from "./components/Orders";
+import Favorites from "./components/Favorites";
 
 // Scrolls to the top on every route change and fades the new page in, so
 // navigating between pages feels like a single smooth flow instead of a
@@ -30,28 +38,23 @@ const PageTransition = () => {
   }, [location.pathname]);
 
   return (
-    <div key={location.pathname} className="animate-[fadeIn_0.25s_ease-in-out]">
+    <div
+      key={location.pathname}
+      className="animate-[fadeIn_0.25s_ease-in-out] min-h-[60vh]"
+    >
       <Outlet />
     </div>
   );
 };
 
 const App = () => {
-  const [userName, setUserName] = useState();
-
-  useEffect(() => {
-    const data = {
-      name: "Tanveer Singh Saini",
-    };
-    setUserName(data.name);
-  }, []);
-
   return (
     <Provider store={appStore}>
-      <UserContext.Provider value={{ userInfo: userName }}>
+      <UserProvider>
         <Header />
         <PageTransition />
-      </UserContext.Provider>
+        <Footer />
+      </UserProvider>
     </Provider>
   );
 };
@@ -81,6 +84,23 @@ const appRouter = createBrowserRouter([
       {
         path: "/cart",
         element: <Cart />,
+      },
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          { path: "/checkout", element: <Checkout /> },
+          { path: "/order/:orderId", element: <OrderConfirmation /> },
+          { path: "/orders", element: <Orders /> },
+          { path: "/favorites", element: <Favorites /> },
+        ],
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },

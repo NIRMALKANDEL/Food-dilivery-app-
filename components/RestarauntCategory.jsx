@@ -11,11 +11,11 @@ const RestarauntCategory = ({ data, showItems, setShowIndex, restaurantId }) => 
         className="flex justify-between items-center cursor-pointer p-4 hover:bg-gray-50 transition-colors"
         onClick={handleClick}
       >
-        <span className="font-bold text-lg text-[#3d4152]">
+        <span className="font-bold text-lg text-ink">
           {data.title} ({data.itemCards.length})
         </span>
         <span
-          className={`text-[#fc8019] font-bold transition-transform duration-300 ${
+          className={`text-brand font-bold transition-transform duration-300 ${
             showItems ? "rotate-180" : ""
           }`}
         >

@@ -1,17 +1,21 @@
 import RestrauntCard from "./RestrauntCard";
 import useOnlineStatus from "../Utils/useOnlineStatus";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Shimmer from "./Shimmer";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { fetchJson } from "../Utils/api";
 import { mockRestaurants } from "../Utils/mockData";
+import { DEFAULT_COORDS } from "../Utils/Constants";
+
+const MAX_CUISINE_CHIPS = 8;
 
 const FilterPill = ({ active, onClick, children }) => (
   <button
     className={`px-4 py-2 rounded-full font-medium border transition-colors active:scale-95 ${
       active
-        ? "bg-[#fc8019] text-white border-[#fc8019]"
-        : "border-gray-300 text-[#3d4152] hover:border-[#fc8019] hover:text-[#fc8019]"
+        ? "bg-brand text-white border-brand"
+        : "border-gray-300 text-ink hover:border-brand hover:text-brand"
     }`}
     onClick={onClick}
   >
@@ -28,18 +32,28 @@ const Body = () => {
   const [vegOnly, setVegOnly] = useState(false);
   const [fastDeliveryOnly, setFastDeliveryOnly] = useState(false);
   const [sortByRating, setSortByRating] = useState(false);
+  const [sortByCost, setSortByCost] = useState(false);
+  const [selectedCuisine, setSelectedCuisine] = useState(null);
+
+  const location = useSelector((store) => store.location);
+  const recentlyViewed = useSelector((store) => store.favorites.recentlyViewed);
 
   useEffect(() => {
     fetchData();
-  }, []);
+    // Re-fetch when the visitor picks a different delivery location, same
+    // way a real delivery app would refresh the restaurant list.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.lat, location.lng]);
 
   const fetchData = async () => {
     setLoading(true);
     let restaurants = [];
+    const lat = location.lat ?? DEFAULT_COORDS.lat;
+    const lng = location.lng ?? DEFAULT_COORDS.lng;
 
     try {
       const json = await fetchJson(
-        "https://www.swiggy.com/dapi/restaurants/list/v5?lat=22.671406264655456&lng=75.87452753433992&is-seo-homepage-enabled=true&page_type=DESKTOP_WEB_LISTING"
+        `https://www.swiggy.com/dapi/restaurants/list/v5?lat=${lat}&lng=${lng}&is-seo-homepage-enabled=true&page_type=DESKTOP_WEB_LISTING`
       );
 
       const restaurantCard = json?.data?.cards?.find(
@@ -66,6 +80,26 @@ const Body = () => {
     setVegOnly(false);
     setFastDeliveryOnly(false);
     setSortByRating(false);
+    setSortByCost(false);
+    setSelectedCuisine(null);
+  };
+
+  const cuisineChips = useMemo(() => {
+    const counts = new Map();
+    listOfRestraunt.forEach((res) => {
+      (res.info.cuisines || []).forEach((c) => {
+        counts.set(c, (counts.get(c) || 0) + 1);
+      });
+    });
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, MAX_CUISINE_CHIPS)
+      .map(([cuisine]) => cuisine);
+  }, [listOfRestraunt]);
+
+  const costForTwoValue = (res) => {
+    const match = /\d+/.exec(res.info.costForTwo || "");
+    return match ? Number(match[0]) : Infinity;
   };
 
   const onlineStatus = useOnlineStatus();
@@ -73,7 +107,7 @@ const Body = () => {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-2">
         <h1 className="text-3xl">📡</h1>
-        <h1 className="text-xl font-bold text-[#3d4152]">
+        <h1 className="text-xl font-bold text-ink">
           Looks like you're offline!
         </h1>
         <p className="text-gray-500">Please check your internet connection.</p>
@@ -94,21 +128,47 @@ const Body = () => {
     .filter(
       (res) => !fastDeliveryOnly || (res.info.sla?.deliveryTime ?? 99) <= 30
     )
-    .sort((a, b) =>
-      sortByRating
-        ? Number(b.info.avgRating || 0) - Number(a.info.avgRating || 0)
-        : 0
-    );
+    .filter(
+      (res) => !selectedCuisine || (res.info.cuisines || []).includes(selectedCuisine)
+    )
+    .sort((a, b) => {
+      if (sortByRating) return Number(b.info.avgRating || 0) - Number(a.info.avgRating || 0);
+      if (sortByCost) return costForTwoValue(a) - costForTwoValue(b);
+      return 0;
+    });
 
   const filtersActive =
-    searchText || topRatedOnly || vegOnly || fastDeliveryOnly || sortByRating;
+    searchText ||
+    topRatedOnly ||
+    vegOnly ||
+    fastDeliveryOnly ||
+    sortByRating ||
+    sortByCost ||
+    selectedCuisine;
 
   return (
     <>
       {usingFallbackData && (
-        <div className="bg-[#fff4e8] text-[#b45309] text-center text-sm py-2 px-4 border-b border-[#fcd9a8]">
-          Swiggy's live servers are unreachable right now, so we're showing
+        <div className="bg-accent-light text-accent-dark text-center text-sm py-2 px-4 border-b border-[#fcd9a8]">
+          Live restaurant data is unreachable right now, so we're showing
           sample restaurant data.
+        </div>
+      )}
+
+      {recentlyViewed.length > 0 && (
+        <div className="max-w-[1280px] mx-auto px-4 pt-6">
+          <h2 className="text-lg font-bold text-ink mb-3">Recently viewed</h2>
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {recentlyViewed.map((info) => (
+              <Link
+                to={`/restraunt/${info.id}`}
+                key={info.id}
+                className="w-40 shrink-0"
+              >
+                <RestrauntCard resData={{ info }} />
+              </Link>
+            ))}
+          </div>
         </div>
       )}
 
@@ -117,7 +177,7 @@ const Body = () => {
           <input
             type="text"
             placeholder="Search for restaurants and food"
-            className="w-full px-4 py-2 text-gray-900 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#fc8019] focus:border-[#fc8019]"
+            className="w-full px-4 py-2 text-gray-900 bg-white border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-brand focus:border-brand"
             value={searchText}
             onChange={(event) => setSearchText(event.target.value)}
           />
@@ -133,7 +193,7 @@ const Body = () => {
         </div>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-2 mb-6 px-4">
+      <div className="flex flex-wrap justify-center gap-2 mb-3 px-4">
         <FilterPill
           active={topRatedOnly}
           onClick={() => setTopRatedOnly((v) => !v)}
@@ -151,9 +211,21 @@ const Body = () => {
         </FilterPill>
         <FilterPill
           active={sortByRating}
-          onClick={() => setSortByRating((v) => !v)}
+          onClick={() => {
+            setSortByRating((v) => !v);
+            setSortByCost(false);
+          }}
         >
           Sort: Rating
+        </FilterPill>
+        <FilterPill
+          active={sortByCost}
+          onClick={() => {
+            setSortByCost((v) => !v);
+            setSortByRating(false);
+          }}
+        >
+          Sort: Price
         </FilterPill>
         {filtersActive && (
           <FilterPill active={false} onClick={resetFilters}>
@@ -161,6 +233,26 @@ const Body = () => {
           </FilterPill>
         )}
       </div>
+
+      {cuisineChips.length > 0 && (
+        <div className="flex flex-wrap justify-center gap-2 mb-6 px-4">
+          {cuisineChips.map((cuisine) => (
+            <button
+              key={cuisine}
+              onClick={() =>
+                setSelectedCuisine((c) => (c === cuisine ? null : cuisine))
+              }
+              className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                selectedCuisine === cuisine
+                  ? "bg-accent text-white border-accent"
+                  : "border-gray-200 text-gray-500 hover:border-accent hover:text-accent-dark"
+              }`}
+            >
+              {cuisine}
+            </button>
+          ))}
+        </div>
+      )}
 
       {displayedRestaurants.length === 0 ? (
         <p className="text-center text-gray-500 py-16">

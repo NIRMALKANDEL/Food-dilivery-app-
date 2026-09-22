@@ -39,8 +39,8 @@ const MenuItemRow = ({ item, restaurantId }) => {
     <div className="group p-3 border-gray-100 border-b last:border-b-0 text-left flex flex-row justify-between gap-3 transition-colors hover:bg-[#fffaf5]">
       <div className="py-2 w-8/12">
         {vegClassifier && <VegIcon isVeg={vegClassifier === "VEG"} />}
-        <div className="font-bold text-[#3d4152] mt-1">{name}</div>
-        <span className="text-[#3d4152] text-sm">₹{price / 100}</span>
+        <div className="font-bold text-ink mt-1">{name}</div>
+        <span className="text-ink text-sm">₹{price / 100}</span>
         {description && (
           <div className="text-xs text-gray-500 pt-1 line-clamp-2">
             {description}
@@ -55,13 +55,13 @@ const MenuItemRow = ({ item, restaurantId }) => {
         />
         {quantity === 0 ? (
           <button
-            className="w-24 px-4 py-1.5 bg-white text-[#fc8019] font-bold shadow-md rounded-lg border border-[#fc8019] hover:bg-[#fc8019] hover:text-white active:scale-95 transition-all"
+            className="w-24 px-4 py-1.5 bg-white text-brand font-bold shadow-md rounded-lg border border-brand hover:bg-brand hover:text-white active:scale-95 transition-all"
             onClick={handleAdd}
           >
             ADD +
           </button>
         ) : (
-          <div className="w-24 flex items-center justify-between px-3 py-1.5 bg-[#fc8019] text-white font-bold shadow-md rounded-lg">
+          <div className="w-24 flex items-center justify-between px-3 py-1.5 bg-brand text-white font-bold shadow-md rounded-lg">
             <button
               className="active:scale-90 transition-transform"
               onClick={handleRemove}

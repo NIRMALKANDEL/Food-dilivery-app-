@@ -41,13 +41,13 @@ const Carousel = ({ data, restaurantId }) => {
         </h1>
         {quantity === 0 ? (
           <button
-            className="absolute font-bold bg-white text-[#fc8019] rounded-lg bottom-2 right-2 px-3 py-1.5 shadow active:scale-95 transition-transform"
+            className="absolute font-bold bg-white text-brand rounded-lg bottom-2 right-2 px-3 py-1.5 shadow active:scale-95 transition-transform"
             onClick={handleAdd}
           >
             Add
           </button>
         ) : (
-          <div className="absolute flex items-center gap-2 bg-white text-[#fc8019] rounded-lg bottom-2 right-2 px-2 py-1.5 shadow font-bold">
+          <div className="absolute flex items-center gap-2 bg-white text-brand rounded-lg bottom-2 right-2 px-2 py-1.5 shadow font-bold">
             <button
               className="active:scale-90 transition-transform"
               onClick={handleRemove}

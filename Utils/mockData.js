@@ -267,7 +267,15 @@ export const buildMockMenu = (resId) => {
       {
         card: {
           card: {
-            info: { name, cuisines, avgRating, costForTwo, sla, veg },
+            info: {
+              name,
+              cuisines,
+              avgRating,
+              costForTwo,
+              sla,
+              veg,
+              cloudinaryImageId,
+            },
           },
         },
       },
